@@ -32,6 +32,7 @@ pub struct Context {
     pub db: salsa::Snapshot<RootDatabase>,
     adjusts: FxHashMap<DefId, Adjust>,
     tags_map: FxHashMap<TagId, Arc<Tags>>,
+    only_types: bool,
 }
 
 impl Deref for Context {
@@ -54,6 +55,7 @@ impl Context {
             db,
             adjusts: Default::default(),
             tags_map: Default::default(),
+            only_types: Default::default(),
         }
     }
 
@@ -63,6 +65,14 @@ impl Context {
 
     pub fn adjust(&self, def_id: DefId) -> Option<&Adjust> {
         self.adjusts.get(&def_id)
+    }
+
+    pub fn set_only_types(&mut self, flag: bool) {
+        self.only_types = flag;
+    }
+
+    pub fn only_types(&self) -> bool {
+        self.only_types
     }
 
     pub fn with_adjust<T, F>(&mut self, def_id: DefId, f: F) -> T

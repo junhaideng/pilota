@@ -21,11 +21,19 @@ mod decode_helper;
 
 pub struct ThriftBackend {
     cx: Arc<Context>,
+    only_types: bool,
 }
 
 impl ThriftBackend {
     pub fn new(cx: Arc<Context>) -> Self {
-        ThriftBackend { cx }
+        ThriftBackend {
+            cx,
+            only_types: false,
+        }
+    }
+    pub fn only_types(mut self, flag: bool) -> Self {
+        self.only_types = flag;
+        self
     }
 }
 
@@ -98,6 +106,9 @@ impl ThriftBackend {
         decode: TokenStream,
         decode_async: TokenStream,
     ) -> TokenStream {
+        if self.cx.only_types() {
+            return Default::default();
+        }
         quote! {
             #[::async_trait::async_trait]
             impl ::pilota::thrift::Message for #name {

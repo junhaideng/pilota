@@ -82,6 +82,7 @@ pub struct Builder<MkB, P> {
     plugins: Vec<Box<dyn Plugin>>,
     ignore_unused: bool,
     touches: Vec<(std::path::PathBuf, Vec<String>)>,
+    only_types: bool,
 }
 
 impl Builder<MkThriftBackend, ThriftParser> {
@@ -97,6 +98,7 @@ impl Builder<MkThriftBackend, ThriftParser> {
             ],
             touches: Vec::default(),
             ignore_unused: true,
+            only_types: false,
         }
     }
 }
@@ -114,6 +116,7 @@ impl Builder<MkProtobufBackend, ProtobufParser> {
             ],
             touches: Vec::default(),
             ignore_unused: true,
+            only_types: false,
         }
     }
 }
@@ -137,6 +140,7 @@ impl<MkB, P> Builder<MkB, P> {
             plugins: self.plugins,
             ignore_unused: self.ignore_unused,
             touches: self.touches,
+            only_types: false,
         }
     }
 
@@ -151,6 +155,11 @@ impl<MkB, P> Builder<MkB, P> {
      */
     pub fn ignore_unused(mut self, flag: bool) -> Self {
         self.ignore_unused = flag;
+        self
+    }
+
+    pub fn only_types(mut self, flag: bool) -> Self {
+        self.only_types = flag;
         self
     }
 
@@ -203,6 +212,7 @@ where
         db.set_nodes_with_durability(Arc::new(nodes), Durability::HIGH);
 
         let mut cx = Context::new(self.source_type, db.snapshot());
+        cx.set_only_types(self.only_types);
         cx.set_tags_map(tags);
 
         cx.exec_plugin(BoxedPlugin);
